@@ -1,4 +1,4 @@
-# LABORATORIO-3
+# LABORATORIO #3
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
@@ -59,10 +59,43 @@ plt.show()
 
 # Aplicar Beamforming con SVD
 min_length = min(len(data_L), len(data_S), len(data_Sh))
-signals_matrix = np.vstack([data_L[:min_length], data_S[:min_length], data_Sh[:min_length]]).T
+signals_matrix = np.column_stack((data_L[:min_length], data_S[:min_length], data_Sh[:min_length]))
+print("Dimensiones correctas de signals_matrix:", signals_matrix.shape)
 
+# Visualizar señales originales alineadas antes de aplicar SVD
+plt.figure(figsize=(15, 10))
+for i in range(3):
+    plt.subplot(3, 1, i + 1)
+    plt.plot(signals_matrix[:, i])
+    plt.title(f"Señal Original Alineada - Mic {i+1}")
+    plt.xlabel("Muestras")
+    plt.ylabel("Amplitud")
+plt.tight_layout()
+plt.show()
+
+# Aplicar SVD correctamente y mostrar las dimensiones de U, S y Vt
 U, S, Vt = svd(signals_matrix, full_matrices=False)
+print("Dimensiones de U:", U.shape)
+print("Dimensiones de S:", S.shape)
+print("Dimensiones de Vt:", Vt.shape)
+
+# Verificar los valores singulares
+print("Valores singulares (S):", S[:10])  # Mostrar solo los primeros 10 valores singulares
+
+# Reconstruir beamformed_signals con más componentes
 beamformed_signals = U[:, :2] @ np.diag(S[:2])
+print("Dimensiones de beamformed_signals (ajustado):", beamformed_signals.shape)
+
+# Visualizar las señales después de Beamforming
+plt.figure(figsize=(15, 10))
+for i in range(2):
+    plt.subplot(2, 1, i + 1)
+    plt.plot(beamformed_signals[:, i])
+    plt.title(f"Beamformed Signal - Componente {i+1}")
+    plt.xlabel("Muestras")
+    plt.ylabel("Amplitud")
+plt.tight_layout()
+plt.show()
 
 # Aplicar Filtro de Wiener para reducción de ruido
 denoised_signals = np.apply_along_axis(lambda x: wiener(x, mysize=29), 0, beamformed_signals)
@@ -72,7 +105,7 @@ plt.figure(figsize=(12, 6))
 for i in range(2):
     plt.subplot(2, 1, i + 1)
     plt.plot(denoised_signals[:, i])
-    plt.title(f"Señal filtrada con Wiener - Componente {i+1}")
+    plt.title(f"Señal Filtrada con Wiener - Componente {i+1}")
     plt.xlabel("Muestras")
     plt.ylabel("Amplitud")
 
@@ -99,12 +132,24 @@ for i in range(2):
 plt.tight_layout()
 plt.show()
 
-# Guardar las señales separadas
-output_files = {}
+# Función para normalizar señales
+def normalize_signal(signal):
+    signal = signal - np.mean(signal)  # Eliminar DC
+    max_val = np.max(np.abs(signal))
+    if max_val > 0:
+        signal = signal / max_val  # Normalizar a [-1, 1]
+        signal = (signal * 32767).astype(np.int16)  # Escalar a int16
+    return signal
+
+# Normalizar las señales antes de guardarlas
+normalized_signals = np.apply_along_axis(normalize_signal, 0, enhanced_signals)
+
+# Guardar las señales separadas normalizadas
+output_files_normalized = {}
 for i in range(2):
-    output_file = f"enhanced_voice_{i+1}.wav"
-    wav.write(output_file, sample_rate_L, enhanced_signals[:, i].astype(np.int16))
-    output_files[f"Voz Separada Mejorada {i+1}"] = output_file
+    output_file = f"enhanced_voice_final_{i+1}.wav"
+    wav.write(output_file, sample_rate_L, normalized_signals[:, i])
+    output_files_normalized[f"Voz Separada Final Normalizada {i+1}"] = output_file
 
 # Mostrar los archivos generados
-output_files
+print("Archivos de audio generados:", output_files_normalized)
