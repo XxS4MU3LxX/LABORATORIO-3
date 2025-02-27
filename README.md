@@ -164,11 +164,21 @@ El producto de matrices `U[:, :3] @ np.diag(S[:3])` representa:
 - La combinación óptima de señales para enfocar la fuente principal.
 - Una señal que maximiza la relación señal/ruido (SNR).
 - Una señal que atenúa componentes de ruido provenientes de otras direcciones.
-- 
+  
 # Aplicar ICA
     ica = FastICA(n_components=3, max_iter=3000, tol=0.0001, random_state=42)
     enhanced_signals = ica.fit_transform(beamformed_signals)
-    
+
+**¿Qué es ICA (Independent Component Analysis)?**
+
+ICA es un método de separación de fuentes ciegas que asume que:
+- Las señales mezcladas son combinaciones lineales de fuentes independientes.
+- Las fuentes originales son estadísticamente independientes entre sí.
+- Cada fuente tiene una distribución no gaussiana.
+Objetivo de ICA:
+- Separar señales mezcladas en fuentes independientes.
+- En este contexto, extraer la voz principal y reducir el ruido de fondo.
+
 **¿Por qué se utiliza FastICA en lugar de ICA estándar?**
 
 FastICA es una versión rápida y optimizada de ICA que:
@@ -177,7 +187,19 @@ FastICA es una versión rápida y optimizada de ICA que:
 - Es computacionalmente más eficiente y converge más rápido que ICA estándar.
 - Es ideal para señales de voz, que tienden a tener una distribución no gaussiana.
 
+**¿Cómo Funciona ICA?**
 
+ICA utiliza un modelo de mezcla lineal: *X=A⋅S*
+
+Donde:
+
+- X: Señal observada (mezcla de fuentes).
+- A: Matriz de mezcla desconocida.
+- S: Fuentes independientes originales (voz, ruido, interferencias).
+
+ICA busca una matriz de separación W tal que: *S=W⋅X*
+- W se calcula maximizando la independencia estadística.
+- Utiliza no gaussianidad como criterio de independencia.
 
 # Normalizar señales antes de guardar
     def normalize_signal(signal):
@@ -190,6 +212,18 @@ FastICA es una versión rápida y optimizada de ICA que:
 
     normalized_signals = np.apply_along_axis(normalize_signal, 0, enhanced_signals)
 
+**¿Por Qué es Necesaria la Normalización?**
+
+Después de aplicar ICA, las señales separadas pueden tener:
+- Amplitud muy alta o muy baja, dependiendo de la mezcla original.
+- Desbalance en la energía debido a la separación independiente.
+- Distorsión o saturación al guardarlas como .wav.
+  
+La normalización asegura que todas las señales tengan:
+- Amplitud adecuada y balanceada.
+- Rango de valores apropiado para guardar el archivo de audio.
+- Calidad de voz consistente y sin distorsión.
+
 # Guardar señales normalizadas en archivos .wav
     output_files_normalized = {}
     for i in range(3):
@@ -199,6 +233,8 @@ FastICA es una versión rápida y optimizada de ICA que:
 
     print("Archivos generados:", output_files_normalized)
 
+
+ 
 # Función para calcular SNR
     def calculate_snr(signal, noise):
      signal_power = np.mean(signal ** 2)
@@ -208,6 +244,8 @@ FastICA es una versión rápida y optimizada de ICA que:
       else:
          return -np.inf  # Manejo de división por cero
 
+ 
+
 # Cálculo de SNR para las señales originales
     snr_original = {
       "MicL": calculate_snr(data_L, data_Noise),
@@ -215,20 +253,28 @@ FastICA es una versión rápida y optimizada de ICA que:
       "MicSh": calculate_snr(data_Sh, data_Noise)
     }
 
+
+
 # Cálculo de SNR para las señales después de Beamforming
     snr_beamforming = {}
     for i in range(beamformed_signals.shape[1]):
       snr_beamforming[f"Beamforming {i+1}"] = calculate_snr(beamformed_signals[:, i], data_Noise)
+
+
 
 # Cálculo de SNR para las señales después de ICA
     snr_ica = {}
     for i in range(enhanced_signals.shape[1]):
       snr_ica[f"ICA {i+1}"] = calculate_snr(enhanced_signals[:, i], data_Noise)
 
+ 
+
 # Cálculo de SNR para las señales Normalizadas
  snr_normalized = {}
     for i in range(normalized_signals.shape[1]):
       snr_normalized[f"Normalizado {i+1}"] = calculate_snr(normalized_signals[:, i], data_Noise)
+
+      
 
 # Cálculo de Potencia del Ruido Ambiente
     potencia_ruido_ambiente = 10 * np.log10(np.mean(data_Noise ** 2))
@@ -263,7 +309,7 @@ FastICA es una versión rápida y optimizada de ICA que:
     wav.write(output_file_filtered, sample_rate_L, best_filtered_signal.astype(np.int16))
 
     print(f"\n=== Archivo de Audio Filtrado Guardado ===")
-    print(f"📥 Archivo Generado: {output_file_filtered}")
+    print(f" Archivo Generado: {output_file_filtered}")
 
 # Graficar SNR en diferentes etapas
     def plot_snr_comparison(snr_dicts, titles, potencia_ruido):
