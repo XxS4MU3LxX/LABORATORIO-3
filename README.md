@@ -433,3 +433,7 @@ Imprime la señal seleccionada y su valor de SNR.
 Se utiliza para determinar cuál de las 3 señales normalizadas tiene la mejor calidad.
     
 ![image](https://github.com/user-attachments/assets/cd097f5d-019d-471c-a3a0-e112955fe93c)
+
+# CONCLUSIONES
+
+
