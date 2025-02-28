@@ -121,6 +121,81 @@ Si se utilizara `max()`, algunas señales serían más cortas, lo que provocarí
 - Pérdida de sincronización en las señales durante el procesamiento conjunto.
 - Distorsiones al aplicar algoritmos como ICA y Beamforming.
 
+# ANÁLISIS TEMPORAL Y ESPECTRAL (FFT)
+    def plot_waveform_and_fft(signal, sample_rate, title):
+      N = len(signal)
+      T = 1.0 / sample_rate
+      time = np.linspace(0.0, N * T, N)
+      freq = np.fft.fftfreq(N, T)[:N // 2]
+      fft_spectrum = np.fft.fft(signal)
+      magnitude = 2.0 / N * np.abs(fft_spectrum[:N // 2])
+
+ Analiza temporal y espectralmente las señales capturadas por los micrófonos ( MicL, MicS, MicSh).
+ 
+Gráfica la forma de onda de la señal en el dominio del tiempo.
+
+Calcula la FFT y gráfica el espectro de frecuencias en el dominio de la frecuencia.
+
+En audio , la FFT permite:
+- Ver qué frecuencias están presentes en una señal.
+- Analizar el contenido espectral de una señal de voz o ruido.
+- Identificar picos de frecuencia que corresponden a tonos o ruidos específicos.
+- 
+En este código, la FFT se usa para:
+- Analizar el contenido espectral de las señales capturadas por los micrófonos.
+- Comparar cómo cambia el espectro después de cada etapa de procesamiento:
+- Original (capturada por los micrófonos)
+- Beamforming (dirigida hacia una fuente)
+- ICA (fuentes separadas)
+- Normalización (filtrado final)
+    
+   # Forma de Onda en el Tiempo
+      plt.figure(figsize=(14, 6))
+      plt.subplot(1, 2, 1)
+      plt.plot(time, signal, color='blue')
+      plt.title(f"Forma de Onda - {title}")
+      plt.xlabel("Tiempo (s)")
+      plt.ylabel("Amplitud")
+      plt.grid()
+
+  Gráfica la forma de onda de la señal en el dominio del tiempo.
+
+   # Espectro de Frecuencia (FFT)
+      plt.subplot(1, 2, 2)
+      plt.plot(freq, magnitude, color='red')
+      plt.title(f"Espectro de Frecuencia (FFT) - {title}")
+      plt.xlabel("Frecuencia (Hz)")
+      plt.ylabel("Magnitud")
+      plt.grid()
+      plt.tight_layout()
+      plt.show()
+
+Gráfica el espectro de frecuencias de la señal en el dominio de la frecuencia.
+
+![image](https://github.com/user-attachments/assets/c96ee8f5-ffd9-43d2-b207-df168a2d9def)
+![image](https://github.com/user-attachments/assets/4045945e-8ad3-44f1-ad5e-df0dbdbe0719)
+![image](https://github.com/user-attachments/assets/c081f693-df75-453a-b4a4-ed5f47180959)
+![image](https://github.com/user-attachments/assets/453bf208-867a-4f10-98e9-0cea5a1e2fc8)
+![image](https://github.com/user-attachments/assets/4b68dbb9-ec3f-454c-8b35-ab9a43df5e47)
+![image](https://github.com/user-attachments/assets/50203e82-3df8-43d6-a9a4-68318de62e4a)
+
+# Análisis Temporal y Espectral para cada micrófono
+     plot_waveform_and_fft(data_L, sample_rate_L, "Micrófono L")
+     plot_waveform_and_fft(data_S, sample_rate_S, "Micrófono S")
+     plot_waveform_and_fft(data_Sh, sample_rate_Sh, "Micrófono Sh")
+
+Se llama a la función `plot_waveform_and_fft()` para analizar las señales capturadas por:
+
+`Micrófono L: ( data_L)`
+
+`Micrófono S: ( data_S)`
+
+`Micrófono Sh: ( data_Sh)`
+
+Permite ver cómo varía la señal en el tiempo y frecuencia.
+
+Identifique patrones o componentes de ruido que afecten la calidad de la señal.
+
 # Aplicar Beamforming con SVD
     signals_matrix = np.column_stack((data_L, data_S, data_Sh))
     U, S, Vt = svd(signals_matrix, full_matrices=False)
@@ -233,247 +308,128 @@ La normalización asegura que todas las señales tengan:
 
     print("Archivos generados:", output_files_normalized)
 
+Guarde las señales normalizadas (filtradas) como archivos de audio .wav.
+
+Genera 3 archivos de audio correspondientes a las 3 señales separadas después de aplicar ICA y Normalización.
+
+Facilita la reproducción, análisis posterior y comparación de las señales filtradas.
 
  
-# Función para calcular SNR
+# ANÁLISIS ESPECTRAL PARA SEÑALES FILTRADAS (NORMALIZADAS)
+
+    print("\n=== Análisis FFT de Señales Filtradas ===")
+    plot_waveform_and_fft(normalized_signals[:, 0], sample_rate_L, "Normalizado 1 (Filtrado)")
+    plot_waveform_and_fft(normalized_signals[:, 1], sample_rate_L, "Normalizado 2 (Filtrado)")
+    plot_waveform_and_fft(normalized_signals[:, 2], sample_rate_L, "Normalizado 3 (Filtrado)")
+
+Analiza espectralmente las 3 señales filtradas después de aplicar:
+- Formación de haces
+- ICA (Análisis de Componentes Independientes)
+- Normalización (Filtrado final)
+- Aplica la FFT a cada señal filtrada para obtener el espectro de frecuencias.
+- 
+Gráfica la forma de onda y el espectro de frecuencias de:
+
+`Normalizado 1 (Filtrado)`
+
+`Normalizado 2 (Filtrado)`
+
+`Normalizado 3 (Filtrado)`
+
+Permite comparar cómo cambia el espectro después de cada etapa de procesamiento.
+
+Ayuda a evaluar la efectividad del filtrado.
+
+# CÁLCULO DE SNR Y POTENCIA DE RUIDO
+
     def calculate_snr(signal, noise):
-     signal_power = np.mean(signal ** 2)
-     noise_power = np.mean(noise ** 2)
-      if noise_power > 0:
-        return 10 * np.log10(signal_power / noise_power)
-      else:
-         return -np.inf  # Manejo de división por cero
+      signal_power = np.mean(signal ** 2)
+      noise_power = np.mean(noise ** 2)
+        if noise_power > 0:
+          return 10 * np.log10(signal_power / noise_power)
+        else:
+          return -np.inf  # Manejo de división por cero
 
+Cuantifica la calidad de la señal.
  
-
-# Cálculo de SNR para las señales originales
-    snr_original = {
-      "MicL": calculate_snr(data_L, data_Noise),
-      "MicS": calculate_snr(data_S, data_Noise),
-      "MicSh": calculate_snr(data_Sh, data_Noise)
-    }
-
-
-
-# Cálculo de SNR para las señales después de Beamforming
-    snr_beamforming = {}
-    for i in range(beamformed_signals.shape[1]):
-      snr_beamforming[f"Beamforming {i+1}"] = calculate_snr(beamformed_signals[:, i], data_Noise)
-
-
-
-# Cálculo de SNR para las señales después de ICA
-    snr_ica = {}
-    for i in range(enhanced_signals.shape[1]):
-      snr_ica[f"ICA {i+1}"] = calculate_snr(enhanced_signals[:, i], data_Noise)
-
+Calcula el SNR (relación señal-ruido) en decibeles (dB).
  
+SNR mide la relación entre la potencia de la señal y la potencia del ruido:
+![image](https://github.com/user-attachments/assets/b6ef11be-0290-4ddc-9b53-0d1731ffb269)
 
-# Cálculo de SNR para las señales Normalizadas
- snr_normalized = {}
-    for i in range(normalized_signals.shape[1]):
-      snr_normalized[f"Normalizado {i+1}"] = calculate_snr(normalized_signals[:, i], data_Noise)
+P_signal : Potencia de la señal.
 
-      
+P_noise : Potencia del ruido.
 
-# Cálculo de Potencia del Ruido Ambiente
+# Potencia del Ruido Ambiente
     potencia_ruido_ambiente = 10 * np.log10(np.mean(data_Noise ** 2))
-
-# Imprimir Potencia del Ruido Ambiente
     print("\n=== Potencia del Ruido Ambiente ===")
     print(f"Potencia de Ruido: {potencia_ruido_ambiente:.2f} dB")
 
-# Imprimir resultados en consola
+Calcula la potencia del ruido ambiente en dB.
+
+data_Noise es el ruido ambiente capturado.
+
+Se calcula como la potencia media en dB:
+
+![image](https://github.com/user-attachments/assets/67cf95a5-68a2-4e0f-afe1-05018bdf45ca)
+
+
+# SNR de las señales en cada etapa
+    snr_original = { 
+      "MicL": calculate_snr(data_L, data_Noise), 
+      "MicS": calculate_snr(data_S, data_Noise), 
+      "MicSh": calculate_snr(data_Sh, data_Noise) 
+    }
+
+    snr_beamforming = { 
+      f"Beamforming {i+1}": calculate_snr(beamformed_signals[:, i], data_Noise) 
+      for i in range(beamformed_signals.shape[1]) 
+    }
+
+    snr_ica = { 
+       f"ICA {i+1}": calculate_snr(enhanced_signals[:, i], data_Noise) 
+       for i in range(enhanced_signals.shape[1]) 
+    }
+
+    snr_normalized = { 
+      f"Normalizado {i+1}": calculate_snr(normalized_signals[:, i], data_Noise) 
+      for i in range(normalized_signals.shape[1]) 
+    }
+
+- Calcula el SNR de las señales originales capturadas por los 3 micrófonos.
+
+- Calcula el SNR de las 3 señales resultantes después de Beamforming.
+
+- Calcula el SNR de las 3 señales obtenidas después de aplicar ICA (FastICA).
+
+- Calcula el SNR de las 3 señales después de la Normalización.
+
+- Cada señal se compara con el ruido ambiente `(data_Noise)` para calcular el SNR en dB.
+
+# Impresión Completa de SNR
     print("\n=== SNR de las Señales ===")
     print("Original:", snr_original)
     print("Después de Beamforming:", snr_beamforming)
     print("Después de ICA:", snr_ica)
     print("Después de Normalización:", snr_normalized)
 
-# === Selección y Guardado del Audio Filtrado Final ===
+Imprime los valores de SNR calculados en cada etapa del procesamiento.
 
-# Función para seleccionar la señal con el mejor SNR
-    def select_best_snr_signal(snr_dict, signals_matrix):
+# SELECCIÓN DEL MEJOR SNR
+
+    def select_best_snr_signal(snr_dict):
       best_snr_key = max(snr_dict, key=snr_dict.get)
-      best_index = int(best_snr_key.split()[-1]) - 1  # Extraer el índice de la mejor señal
-      best_signal = signals_matrix[:, best_index]
+      best_snr = snr_dict[best_snr_key]
       print(f"\n=== Mejor Señal Filtrada ===")
-      print(f"Señal Seleccionada: {best_snr_key} con SNR de {snr_dict[best_snr_key]:.2f} dB")
-      return best_signal
+      print(f"Señal Seleccionada: {best_snr_key} con SNR de {best_snr:.2f} dB")
 
-# Seleccionar la mejor señal normalizada
-    best_filtered_signal = select_best_snr_signal(snr_normalized, normalized_signals)
+    select_best_snr_signal(snr_normalized)
 
-# Guardar el archivo de audio filtrado final
-    output_file_filtered = os.path.join(output_dir, "filtered_voice_final.wav")
-    wav.write(output_file_filtered, sample_rate_L, best_filtered_signal.astype(np.int16))
+Selecciona la señal filtrada con el mejor SNR.
 
-    print(f"\n=== Archivo de Audio Filtrado Guardado ===")
-    print(f" Archivo Generado: {output_file_filtered}")
+Imprime la señal seleccionada y su valor de SNR.
 
-# Graficar SNR en diferentes etapas
-    def plot_snr_comparison(snr_dicts, titles, potencia_ruido):
-     plt.figure(figsize=(14, 12))
-      for i, (snr_dict, title) in enumerate(zip(snr_dicts, titles)):
-         labels = list(snr_dict.keys())
-         values = list(snr_dict.values())
-        
-         plt.subplot(3, 2, i+1)
-         plt.bar(labels, values, color='skyblue', label="SNR Señales")
-         plt.axhline(y=potencia_ruido, color='red', linestyle='--', label="Potencia Ruido Ambiente")
-         plt.title(title)
-         plt.xlabel("Señales")
-         plt.ylabel("SNR (dB)")
-         plt.xticks(rotation=45)
-         plt.grid(True, linestyle='--', alpha=0.7)
-         plt.legend()
+Se utiliza para determinar cuál de las 3 señales normalizadas tiene la mejor calidad.
     
-      plt.tight_layout()
-      plt.show()
-
-    plot_snr_comparison(
-      [snr_original, snr_beamforming, snr_ica, snr_normalized],
-      ["Original", "Beamforming", "ICA", "Normalización"],
-      potencia_ruido_ambiente
-    )
-
-
-
-
-
-
-
-# Guardar en diccionarios para facilitar el acceso
-audio_data = {"micL": data_L, "micS": data_S, "micSh": data_Sh}
-sample_rates = {"micL": sample_rate_L, "micS": sample_rate_S, "micSh": sample_rate_Sh}
-
-# Calcular la Relación Señal-Ruido (SNR)
-def calculate_snr(signal, noise):
-    signal_power = np.mean(signal ** 2)
-    noise_power = np.mean(noise ** 2)
-    return 10 * np.log10(signal_power / noise_power)
-
-snr_values = {key: calculate_snr(data, data_Noise[:len(data)]) for key, data in audio_data.items()}
-print("Valores de SNR:", snr_values)
-
-# Visualización de las formas de onda y espectrogramas con subplots
-fig = plt.figure(figsize=(15, 15))
-for i, (key, data) in enumerate(audio_data.items()):
-    sr = sample_rates[key]
-    time = np.linspace(0, len(data) / sr, num=len(data))
-
-    # Forma de onda
-    plt.subplot(len(audio_data), 2, i * 2 + 1)
-    plt.plot(time, data)
-    plt.title(f"Forma de onda - {key}")
-    plt.xlabel("Tiempo (s)")
-    plt.ylabel("Amplitud")
-
-    # Espectrograma
-    f, t, Sxx = signal.spectrogram(data, sr)
-    plt.subplot(len(audio_data), 2, i * 2 + 2)
-    plt.imshow(10 * np.log10(Sxx), aspect='auto', origin='lower',
-               extent=[t.min(), t.max(), f.min(), f.max()])
-    plt.title(f"Espectrograma - {key}")
-    plt.xlabel("Tiempo (s)")
-    plt.ylabel("Frecuencia (Hz)")
-
-plt.tight_layout()
-plt.show()
-
-# Aplicar Beamforming con SVD
-min_length = min(len(data_L), len(data_S), len(data_Sh))
-signals_matrix = np.column_stack((data_L[:min_length], data_S[:min_length], data_Sh[:min_length]))
-print("Dimensiones correctas de signals_matrix:", signals_matrix.shape)
-
-# Visualizar señales originales alineadas antes de aplicar SVD
-plt.figure(figsize=(15, 10))
-for i in range(3):
-    plt.subplot(3, 1, i + 1)
-    plt.plot(signals_matrix[:, i])
-    plt.title(f"Señal Original Alineada - Mic {i+1}")
-    plt.xlabel("Muestras")
-    plt.ylabel("Amplitud")
-plt.tight_layout()
-plt.show()
-
-# Aplicar SVD correctamente y mostrar las dimensiones de U, S y Vt
-U, S, Vt = svd(signals_matrix, full_matrices=False)
-print("Dimensiones de U:", U.shape)
-print("Dimensiones de S:", S.shape)
-print("Dimensiones de Vt:", Vt.shape)
-
-# Verificar los valores singulares
-print("Valores singulares (S):", S[:10])  # Mostrar solo los primeros 10 valores singulares
-
-# Reconstruir beamformed_signals con más componentes
-beamformed_signals = U[:, :2] @ np.diag(S[:2])
-print("Dimensiones de beamformed_signals (ajustado):", beamformed_signals.shape)
-
-# Visualizar las señales después de Beamforming
-plt.figure(figsize=(15, 10))
-for i in range(2):
-    plt.subplot(2, 1, i + 1)
-    plt.plot(beamformed_signals[:, i])
-    plt.title(f"Beamformed Signal - Componente {i+1}")
-    plt.xlabel("Muestras")
-    plt.ylabel("Amplitud")
-plt.tight_layout()
-plt.show()
-
-# Aplicar Filtro de Wiener para reducción de ruido
-denoised_signals = np.apply_along_axis(lambda x: wiener(x, mysize=29), 0, beamformed_signals)
-
-# Visualización de las señales procesadas con subplots
-plt.figure(figsize=(12, 6))
-for i in range(2):
-    plt.subplot(2, 1, i + 1)
-    plt.plot(denoised_signals[:, i])
-    plt.title(f"Señal Filtrada con Wiener - Componente {i+1}")
-    plt.xlabel("Muestras")
-    plt.ylabel("Amplitud")
-
-plt.tight_layout()
-plt.show()
-
-# Aplicar PCA para estabilizar las señales
-pca = PCA(n_components=2, whiten=True, random_state=42)
-pca_signals = pca.fit_transform(denoised_signals)
-
-# Aplicar ICA para separación de fuentes
-ica = FastICA(n_components=2, max_iter=3000, tol=0.0001, random_state=42)
-enhanced_signals = ica.fit_transform(pca_signals)
-
-# Visualización de las señales separadas con subplots
-plt.figure(figsize=(12, 6))
-for i in range(2):
-    plt.subplot(2, 1, i + 1)
-    plt.plot(enhanced_signals[:, i])
-    plt.title(f"Señal Separada por ICA - Componente {i+1}")
-    plt.xlabel("Muestras")
-    plt.ylabel("Amplitud")
-
-plt.tight_layout()
-plt.show()
-
-# Función para normalizar señales
-def normalize_signal(signal):
-    signal = signal - np.mean(signal)  # Eliminar DC
-    max_val = np.max(np.abs(signal))
-    if max_val > 0:
-        signal = signal / max_val  # Normalizar a [-1, 1]
-        signal = (signal * 32767).astype(np.int16)  # Escalar a int16
-    return signal
-
-# Normalizar las señales antes de guardarlas
-normalized_signals = np.apply_along_axis(normalize_signal, 0, enhanced_signals)
-
-# Guardar las señales separadas normalizadas
-output_files_normalized = {}
-for i in range(2):
-    output_file = f"enhanced_voice_final_{i+1}.wav"
-    wav.write(output_file, sample_rate_L, normalized_signals[:, i])
-    output_files_normalized[f"Voz Separada Final Normalizada {i+1}"] = output_file
-
-# Mostrar los archivos generados
-print("Archivos de audio generados:", output_files_normalized)
+![image](https://github.com/user-attachments/assets/cd097f5d-019d-471c-a3a0-e112955fe93c)
