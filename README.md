@@ -452,3 +452,11 @@ Calibrar el sistema antes de la grabación: Medir el ruido ambiental y ajustar l
 
 Incluir pruebas con diferentes niveles de ruido: Para evaluar la robustez del sistema ante condiciones más realistas.
 
++ En esta práctica, el objetivo era aplicar técnicas de procesamiento de señales para separar las tres voces grabadas en un entorno con múltiples fuentes sonoras, obteniendo como resultado tres archivos de audio individuales con las voces limpias de cada participante. Sin embargo, debido a diferencias en los niveles de volumen entre los hablantes, el resultado no fue el esperado.
+
+Uno de los participantes, Samuel, habló con un volumen significativamente más alto en comparación con las otras dos participantes, Shesly y Luz Marina, quienes hablaron en un tono más bajo. Esta discrepancia afectó la captura de las señales por parte de los micrófonos, ya que la voz de Samuel predominó en las grabaciones, dificultando la correcta separación de las voces de menor intensidad. Como resultado, no fue posible aislar con claridad las voces de Shesly y juz Marina, ya que quedaron enmascaradas por la señal más fuerte.
+
+Este problema se debe a que los métodos de separación de fuentes, como el Análisis de Componentes Independientes (ICA), dependen de diferencias notables en las características de las señales capturadas por cada micrófono. Cuando una fuente sonora domina en amplitud, las demás señales pueden volverse indistinguibles dentro del ruido de fondo o ser consideradas como componentes de menor relevancia en el análisis.
+
+Para mejorar los resultados en futuras pruebas, se podrían implementar estrategias como el control del volumen de los participantes durante la grabación, el ajuste de la sensibilidad de los micrófonos o el uso de técnicas de normalización de amplitud antes del procesamiento. De esta manera, se lograría una captura más equilibrada y se facilitaría la correcta separación de cada señal de voz.
+
