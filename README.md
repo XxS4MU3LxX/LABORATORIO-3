@@ -1,4 +1,4 @@
-no# LABORATORIO #3
+# LABORATORIO #3
 
 ***Luz Marina Valderrama-5600741***
 
@@ -435,7 +435,9 @@ Se utiliza para determinar cuál de las 3 señales normalizadas tiene la mejor c
 ![image](https://github.com/user-attachments/assets/cd097f5d-019d-471c-a3a0-e112955fe93c)
 
 # CONCLUSIONES
+
 1. ¿Cómo afecta la posición relativa de los micrófonos y las fuentes sonoras en la efectividad de la separación de señales?
+   
 La posición de los micrófonos y las fuentes sonoras es clave para la separación de señales porque determina cómo cada micrófono captura la combinación de las voces. Si los micrófonos están demasiado cerca unos de otros o alineados con las fuentes, las señales captadas serán muy similares, dificultando la separación. En cambio, si están bien distribuidos en el espacio y a diferentes distancias de las fuentes, se pueden obtener diferencias en la amplitud y fase de las señales, facilitando el uso de técnicas como el Análisis de Componentes Independientes (ICA) o Beamforming para separar cada voz.
 
 
@@ -457,6 +459,8 @@ Incluir pruebas con diferentes niveles de ruido: Para evaluar la robustez del si
 Uno de los participantes, Samuel, habló con un volumen significativamente más alto en comparación con las otras dos participantes, Shesly y Luz Marina, quienes hablaron en un tono más bajo. Esta discrepancia afectó la captura de las señales por parte de los micrófonos, ya que la voz de Samuel predominó en las grabaciones, dificultando la correcta separación de las voces de menor intensidad. Como resultado, no fue posible aislar con claridad las voces de Shesly y Luz Marina, ya que quedaron enmascaradas por la señal más fuerte.
 
 Este problema se debe a que los métodos de separación de fuentes, como el Análisis de Componentes Independientes (ICA), dependen de diferencias notables en las características de las señales capturadas por cada micrófono. Cuando una fuente sonora domina en amplitud, las demás señales pueden volverse indistinguibles dentro del ruido de fondo o ser consideradas como componentes de menor relevancia en el análisis.
+
+En conclusion, el mejor método para separar las señales fue ICA (Independent Component Analysis), ya que logró la mayor independencia entre las fuentes de audio y obtuvo el mejor SNR. Aunque Beamforming con SVD ayudó a enfocar la captación de una fuente, no separó completamente las voces, mientras que la normalización solo ajustó los niveles de volumen sin mejorar la separación. Sin embargo, el experimento presentó dificultades debido a la diferencia en los volúmenes de los hablantes, lo que hizo que la voz de Samuel predominara en la separación.
 
 Para mejorar los resultados en futuras pruebas, se podrían implementar estrategias como el control del volumen de los participantes durante la grabación, el ajuste de la sensibilidad de los micrófonos o el uso de técnicas de normalización de amplitud antes del procesamiento. De esta manera, se lograría una captura más equilibrada y se facilitaría la correcta separación de cada señal de voz.
 
