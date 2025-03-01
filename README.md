@@ -435,5 +435,20 @@ Se utiliza para determinar cuál de las 3 señales normalizadas tiene la mejor c
 ![image](https://github.com/user-attachments/assets/cd097f5d-019d-471c-a3a0-e112955fe93c)
 
 # CONCLUSIONES
+1. ¿Cómo afecta la posición relativa de los micrófonos y las fuentes sonoras en la efectividad de la separación de señales?
+La posición de los micrófonos y las fuentes sonoras es clave para la separación de señales porque determina cómo cada micrófono captura la combinación de las voces. Si los micrófonos están demasiado cerca unos de otros o alineados con las fuentes, las señales captadas serán muy similares, dificultando la separación. En cambio, si están bien distribuidos en el espacio y a diferentes distancias de las fuentes, se pueden obtener diferencias en la amplitud y fase de las señales, facilitando el uso de técnicas como el Análisis de Componentes Independientes (ICA) o Beamforming para separar cada voz.
 
+
+2. ¿Qué mejoras implementaría en la metodología para obtener mejores resultados?
+Para mejorar los resultados, se podrían implementar las siguientes mejoras:
+
+Aumentar el número de micrófonos: Más micrófonos permiten una mejor captura espacial de las señales, facilitando la separación.
+
+Optimizar la ubicación de los micrófonos: Distribuirlos estratégicamente para maximizar las diferencias en la captura de cada fuente.
+
+Aplicar técnicas avanzadas de procesamiento de señales: Usar filtros adaptativos, técnicas de reducción de ruido y métodos avanzados de separación de fuentes como Deep Learning.
+
+Calibrar el sistema antes de la grabación: Medir el ruido ambiental y ajustar la ganancia de los micrófonos para mejorar la calidad de las grabaciones.
+
+Incluir pruebas con diferentes niveles de ruido: Para evaluar la robustez del sistema ante condiciones más realistas.
 
